@@ -1,0 +1,56 @@
+version: '3.7'
+x-mongo-secrets: &mongo-credentials
+  MONGO_USER: &mongo-user root
+  MONGO_PASS: &mongo-pass arcipretechiavetta
+  MONGO_AUTH_DB: admin
+  MONGO_HOST: mongodb
+  MONGO_PORT: 27017
+  MONGO_DB_NAME: shipping_db
+
+x-kafka-env: &kafka-env
+  KAFKA_BROKER_ID: 1
+  KAFKA_ADVERTISED_PORT: 9092
+  BROKER_ID_COMMAND: "hostname | cut -d'-' -f2"
+  KAFKA_ZOOKEEPER_CONNECT: "zoo:2181"
+  KAFKA_CREATE_TOPICS: "logging:20:1,pushnotifications:10:1,invoicing:10:1,mailing:10:1,userupdates:10:1,orderupdates:10:1"
+  KAFKA_LISTENERS: "PLAINTEXT://:9092"
+
+x-common-settings: &common-settings
+  restart: always
+
+services:
+  mongodb:
+    <<: *common-settings
+    image: mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: *mongo-user
+      MONGO_INITDB_ROOT_PASSWORD: *mongo-pass
+    volumes:
+      - mongo-db-data:/data/db
+
+  shipping-manager:
+    <<: *common-settings
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    environment: *mongo-credentials
+    depends_on:
+      - mongodb
+    ports:
+     - "8080:8080"
+
+  zoo:
+    <<: *common-settings
+    image: library/zookeeper:3.4.13
+    environment:
+      ZOO_MY_ID: 1
+
+  kafka:
+    <<: *common-settings
+    environment: *kafka-env
+    image: wurstmeister/kafka:2.11-2.0.0
+    ports:
+     - "9092:9092"
+
+volumes:
+  mongo-db-data:
