@@ -1,18 +1,17 @@
 package ecommerce.shippingmanagerkubernetes9barcipretechiavetta.shippingmanagerkubernetes.Utility;
 
 import java.io.Serializable;
-import java.time.LocalDateTime;
 
 public class OrderValidationRequest implements Serializable {
-    private LocalDateTime timestamp;
+    private long timestamp;
     private Integer status;
     private String orderId;
 
-    public LocalDateTime getTimestamp() {
+    public long getTimestamp() {
         return timestamp;
     }
 
-    public OrderValidationRequest setTimestamp(LocalDateTime timestamp) {
+    public OrderValidationRequest setTimestamp(long timestamp) {
         this.timestamp = timestamp;
         return this;
     }
